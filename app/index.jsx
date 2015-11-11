@@ -16,11 +16,3 @@ function main() {
   document.body.appendChild(app);
   React.render(<App />, app);
 }
-
-//require('./main.css');
-//
-//var component = require('./component');
-//var app = document.createElement('div');
-//
-//document.body.appendChild(app);
-//app.appendChild(component());
