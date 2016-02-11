@@ -1,18 +1,25 @@
-var path = require('path');
-var HtmlwebpackPlugin = require('html-webpack-plugin');
-var webpack = require('webpack');
-var merge = require('webpack-merge');
+const path = require('path');
+const merge = require('webpack-merge');
+const webpack = require('webpack');
+const NpmInstallPlugin = require('npm-install-webpack-plugin');
 
-var TARGET = process.env.npm_lifecycle_event;
-var ROOT_PATH = path.resolve(__dirname);
+const TARGET = process.env.npm_lifecycle_event;
+const PATHS = {
+  app: path.join(__dirname, 'app'),
+  build: path.join(__dirname, 'build')
+};
 
-var common = {
-  entry: path.resolve(ROOT_PATH, 'app'),
+process.env.BABEL_ENV = TARGET;
+
+const common = {
+  entry: {
+    app: PATHS.app
+  },
   resolve: {
     extensions: ['', '.js', '.jsx']
   },
   output: {
-    path: path.resolve(ROOT_PATH, 'build'),
+    path: PATHS.build,
     filename: 'bundle.js'
   },
   module: {
@@ -20,37 +27,43 @@ var common = {
       {
         test: /\.css$/,
         loaders: ['style', 'css'],
-        include: path.resolve(ROOT_PATH, 'app')
+        include: PATHS.app
+      },
+      {
+        test: /\.jsx?$/,
+        loaders: ['babel?cacheDirectory'],
+        include: PATHS.app
       }
     ]
-  },
-  plugins: [
-    new HtmlwebpackPlugin({
-      title: 'Kanban app'
-    })
-  ]
+  }
 };
 
 if (TARGET === 'start' || !TARGET) {
   module.exports = merge(common, {
     devtool: 'eval-source-map',
-    module: {
-      loaders: [
-        {
-          test: /\.jsx?$/,
-          loaders: ['react-hot', 'babel'],
-          include: path.resolve(ROOT_PATH, 'app')
-        }
-      ]
-    },
     devServer: {
+      contentBase: PATHS.build,
       historyApiFallback: true,
       hot: true,
       inline: true,
-      progress: true
+      progress: true,
+
+      // Display only errors to reduce the amount of output
+      stats: 'errors-only',
+
+      // Parse host and port from env so this is easy to customize
+      host: process.env.HOST,
+      port: process.env.PORT
     },
     plugins: [
-      new webpack.HotModuleReplacementPlugin()
+      new webpack.HotModuleReplacementPlugin(),
+      new NpmInstallPlugin({
+        save: true // --save
+      })
     ]
   });
+}
+
+if (TARGET === 'build') {
+  module.exports = merge(common, {});
 }
