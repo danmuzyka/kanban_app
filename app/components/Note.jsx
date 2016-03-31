@@ -4,36 +4,34 @@ export default class Note extends React.Component {
   constructor(props) {
     super(props);
 
-    this.finishEdit = this.finishEdit.bind(this);
-    this.checkEnter = this.checkEnter.bind(this);
-    this.edit = this.edit.bind(this);
-    this.renderEdit = this.renderEdit.bind(this);
-    this.renderTask = this.renderTask.bind(this);
-
     this.state = {
       editing: false
     };
   }
 
   render() {
-    const editing = this.state.editing;
-
-    return (
-      <div>
-        {editing ? this.renderEdit() : this.renderTask()}
-      </div>
-    );
+    if (this.state.editing) {
+      return this.renderEdit();
+    }
+    return this.renderNote();
   }
 
-  renderEdit() {
+  renderEdit = () => {
     return <input type='text'
+      ref={
+        (e) => e ? e.selectionStart = this.props.task.length : null
+      }
       autofocus={true}
       defaultValue={this.props.task}
       onBlur={this.finishEdit}
       onKeyPress={this.checkEnter} />;
-  }
+  };
 
-  renderTask() {
+  renderDelete = () => {
+    return <button className='delete-note' onClick={this.props.onDelete}>x</button>;
+  };
+
+  renderNote = () => {
     const onDelete = this.props.onDelete;
     return (
       <div onClick={this.edit}>
@@ -41,29 +39,29 @@ export default class Note extends React.Component {
         {onDelete ? this.renderDelete() : null }
       </div>
     );
-  }
+  };
 
-  renderDelete() {
-    return <button className='delete' onClick={this.props.onDelete}>x</button>;
-  }
-
-  edit() {
+  edit = () => {
     this.setState({
       editing: true
     });
-  }
+  };
 
-  checkEnter(e) {
+  checkEnter = (e) => {
     if(e.key === 'Enter') {
       this.finishEdit(e);
     }
-  }
+  };
 
-  finishEdit(e) {
-    this.props.onEdit(e.target.value);
+  finishEdit = (e) => {
+    const value = e.target.value;
+    if (this.props.onEdit) {
+      this.props.onEdit(value);
 
-    this.setState({
-      editing: false
-    });
-  }
+      // Exit edit mode.
+      this.setState({
+        editing: false
+      });
+    }
+  };
 }

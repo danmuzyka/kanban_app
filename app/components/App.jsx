@@ -1,9 +1,9 @@
-import AltContainer from 'alt/AltContainer';
+import AltContainer from 'alt-container';
 import uuid from 'node-uuid';
 import React from 'react';
-import Notes from './Notes.jsx';
-import NoteActions from '../actions/NoteActions';
-import NoteStore from '../stores/NoteStore';
+import Lanes from './Lanes.jsx';
+import LaneActions from '../actions/LaneActions';
+import LaneStore from '../stores/LaneStore';
 
 export default class App extends React.Component {
 
@@ -11,38 +11,19 @@ export default class App extends React.Component {
 
     return (
       <div>
-        <button className='add-note' onClick={this.addNote}>+</button>
+        <button className='add-lane' onClick={this.addLane}>+</button>
         <AltContainer
-          stores={[NoteStore]}
+          stores={[LaneStore]}
           inject={ {
-            notes: () => NoteStore.getState().notes
+            lanes: () => LaneStore.getState().lanes || []
           } }>
-          <Notes onEdit={this.editNote} onDelete={this.deleteNote} />
+          <Lanes />
         </AltContainer>
       </div>
     );
   }
 
-  addNote() {
-    NoteActions.create({task: 'New Task'});
-  }
-
-  editNote(id, task) {
-    NoteActions.update({id, task});
-  }
-
-  findNote(id) {
-    const notes = this.state.notes;
-    const noteIndex = notes.findIndex((note) => note.id === id);
-
-    if(noteIndex < 0) {
-      console.warn('Failed to find note', notes, id);
-    }
-
-    return noteIndex;
-  }
-
-  deleteNote(id) {
-    NoteActions.delete(id);
+  addLane() {
+    LaneActions.create({name: 'New lane'});
   }
 }
